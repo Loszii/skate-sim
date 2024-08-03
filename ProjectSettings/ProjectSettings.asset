@@ -4,7 +4,7 @@
 PlayerSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 26
-  productGUID: b7434a3a0520a98458f9b0665af1a7a7
+  productGUID: 89fbab965a051254a833328d58411954
   AndroidProfiler: 0
   AndroidFilterTouchesWhenObscured: 0
   AndroidEnableSustainedPerformanceMode: 0
@@ -754,10 +754,10 @@ PlayerSettings:
   apiCompatibilityLevel: 6
   activeInputHandler: 0
   windowsGamepadBackendHint: 0
-  cloudProjectId: f9a4c060-a47b-45a1-94c5-7a0484dfffba
+  cloudProjectId: 85193d14-1aea-4fff-b4f0-187071bb7ef6
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: skate-sim
+  projectName: skate-sim 2024-08-02_22-49-36
   organizationId: jiozzi11
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
