@@ -531,6 +531,7 @@ MonoBehaviour:
   front_right: {fileID: 123376274}
   back_left: {fileID: 844716184}
   back_right: {fileID: 1536460329}
+  on_ground: 0
 --- !u!65 &783814958
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -771,7 +772,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad5896bd53ab2b24f86a9d003051cc58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target: {fileID: 783814960}
+  skateboard: {fileID: 783814956}
 --- !u!1 &1376192867
 GameObject:
   m_ObjectHideFlags: 0
@@ -872,8 +873,8 @@ Transform:
   m_GameObject: {fileID: 1376192867}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.01, y: 1.633, z: 17.87}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -0.01, y: -0.02, z: 17.87}
+  m_LocalScale: {x: 1, y: 0.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
