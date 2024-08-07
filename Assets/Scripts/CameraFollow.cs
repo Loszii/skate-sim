@@ -18,15 +18,14 @@ public class CameraFollow : MonoBehaviour
     void FixedUpdate()
     {
         //pos
-        Vector3 offset = new(0, 1f, -2f);
-        var target_position = target.TransformPoint(offset);
+        Vector3 offset = new(0, 0, -2f); //-2 back in local position
+        Vector3 target_position = target.TransformPoint(offset) + new Vector3(0, 1f, 0); //transformPoint is relative to object coors sys, then +1 relative to world
+    
         transform.position = Vector3.Lerp(transform.position, target_position, speed * Time.fixedDeltaTime); //lerp for smoothing
 
         //rotation
-        if (script.on_ground) {
-            var direction = target.position - transform.position + new Vector3(0, 0.5f, 0); //vector pointing 0.5 above board
-            var rotation = Quaternion.LookRotation(direction);
-            transform.rotation = Quaternion.Lerp(transform.rotation, rotation, speed * Time.fixedDeltaTime);   
-        }
+        var direction = target.position - transform.position + new Vector3(0, 0.5f, 0); //vector pointing 0.5 above board
+        var rotation = Quaternion.LookRotation(direction);
+        transform.rotation = Quaternion.Lerp(transform.rotation, rotation, speed * Time.fixedDeltaTime);   
     }
 }
