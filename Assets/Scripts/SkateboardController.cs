@@ -69,7 +69,7 @@ public class SkateboardController : MonoBehaviour
     }
 
     void OnCollisionStay(Collision collision) {
-        if (collision.gameObject.name == "Floor") {
+        if (collision.gameObject.transform.parent.name == "Map") {
             upside_down = true;
         }
     }
