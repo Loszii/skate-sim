@@ -12,6 +12,7 @@ public class SkateboardController : MonoBehaviour
 {
     public GameObject board_visual;
     public bool on_ground = true;
+    public bool upside_down = false; //on ground with up facing down
 
     private Rigidbody rb;
     private Transform deck;
@@ -28,7 +29,7 @@ public class SkateboardController : MonoBehaviour
 
     void FixedUpdate()
     {
-        //PHYSIC
+        //PHYSICS
 
         //gravity
         rb.AddForce(gravity * Time.fixedDeltaTime, ForceMode.Acceleration);
@@ -57,7 +58,7 @@ public class SkateboardController : MonoBehaviour
         float v_input = Input.GetAxis("Vertical");
 
         //ground movement
-        if (on_ground) {
+        if (on_ground && !upside_down) {
             //forward
             if (rb.velocity.magnitude < max_speed) {
                 rb.AddForce(transform.forward * v_input * Time.fixedDeltaTime * 400, ForceMode.Acceleration);
@@ -65,12 +66,8 @@ public class SkateboardController : MonoBehaviour
 
             //rotate rigid
             Quaternion delta_rotation;
-            if (Math.Abs(local_velocity.z) < kickturn_thresh) {
-                if (local_velocity.z >= -0.01) {
-                    delta_rotation = Quaternion.Euler(new Vector3(0, h_input, 0) * Time.fixedDeltaTime * 100);
-                } else {
-                    delta_rotation = Quaternion.Euler(new Vector3(0, -h_input, 0) * Time.fixedDeltaTime * 100);
-                }
+            if (Math.Abs(local_velocity.z) < kickturn_thresh && Math.Abs(v_input) == 0) {
+                delta_rotation = Quaternion.Euler(new Vector3(0, h_input, 0) * Time.fixedDeltaTime * 100);
             } else {
                 delta_rotation = Quaternion.Euler(new Vector3(0, h_input, 0) * Time.fixedDeltaTime * local_velocity.z*20);
             }
@@ -100,7 +97,7 @@ public class SkateboardController : MonoBehaviour
         //VISUAL EFFECTS
 
         //kickturn
-        if (on_ground && Math.Abs(h_input) > 0 && Math.Abs(local_velocity.z) < kickturn_thresh) { //kickturn
+        if (on_ground && !upside_down && Math.Abs(h_input) > 0 && Math.Abs(v_input) == 0 && Math.Abs(local_velocity.z) < kickturn_thresh) { //kickturn
             //gets a quaternion that uses the current angles about axis and rotates 15 less from x (tilt up)
             Quaternion kickturn_rotation = Quaternion.Euler(transform.eulerAngles + new Vector3(-15f, 0, 0));
             //to interpolate smoothly, adjusting delta time multiplier for faster
@@ -108,7 +105,7 @@ public class SkateboardController : MonoBehaviour
 
             //move graphics slightly up
             board_visual.transform.position = Vector3.Lerp(board_visual.transform.position, transform.position + new Vector3(0, 0.02f, 0), 5f * Time.fixedDeltaTime);
-        } else if (!on_ground || Math.Abs(h_input) == 0 || Math.Abs(local_velocity.z) > kickturn_thresh) {
+        } else {
             //undo the kickturn visual
             Quaternion kickturn_rotation = Quaternion.Euler(transform.eulerAngles); //get quaternion representing the parent object (one this script is on) rotations
             board_visual.transform.rotation = Quaternion.Lerp(board_visual.transform.rotation, kickturn_rotation, 5f * Time.fixedDeltaTime);
@@ -117,7 +114,7 @@ public class SkateboardController : MonoBehaviour
             board_visual.transform.position = Vector3.Lerp(board_visual.transform.position, transform.position, 5f * Time.fixedDeltaTime);
         }
         //board tilt
-        if (on_ground && Math.Abs(h_input) > 0.1) {
+        if (on_ground && Math.Abs(h_input) > 0.1 && !upside_down) {
             //rotate h_input*20 from board visual rotation
             Quaternion deck_angle = Quaternion.Euler(board_visual.transform.eulerAngles + new Vector3(0, 0, -15f * h_input));
             deck.rotation = Quaternion.Lerp(deck.rotation, deck_angle, 5f * Time.fixedDeltaTime);
@@ -131,12 +128,16 @@ public class SkateboardController : MonoBehaviour
     void OnCollisionStay(Collision collision) {
         if (collision.gameObject.transform.parent.name == "Map") {
             on_ground = true;
+            if (Vector3.Dot(transform.up, Vector3.down) > 0) { //up direction has overlap with down vector
+                upside_down = true;
+            }
         }
     }
 
     void OnCollisionExit(Collision collision) {
         if (collision.gameObject.transform.parent.name == "Map") {
             on_ground = false;
+            upside_down = false;
         }
     }
 }
