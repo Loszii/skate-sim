@@ -20,13 +20,13 @@ public class SkateboardController : MonoBehaviour
 
     private Rigidbody rb;
     private Transform deck;
-    private readonly Vector3 gravity = new(0, -200f, 0);
+    private readonly Vector3 gravity = new(0, -250f, 0);
     private readonly float sideways_friction = 15f;
     private readonly float max_speed = 7.5f;
     private readonly float kickturn_thresh = 2f;
     private readonly float kickturn_speed = 100f;
     private readonly float turn_speed = 15f;
-    private readonly float pop = 40f;
+    private readonly float pop = 50f;
     private readonly float steez = 25f;
 
     void Start()
@@ -63,7 +63,7 @@ public class SkateboardController : MonoBehaviour
                 sideways_velocity = 0;
             }
             local_velocity.x = sideways_velocity; //set back
-            
+
             rb.velocity = transform.TransformDirection(local_velocity); //set back to world rel
         }
     }
@@ -74,7 +74,6 @@ public class SkateboardController : MonoBehaviour
         if (upside_down) {
             if (Input.GetKey("o")) {
                 rb.AddForce(Vector3.up * pop * Time.fixedDeltaTime, ForceMode.Impulse);
-                upside_down = false;
             }
         } else if (on_ground) {
             //ground movement
@@ -150,7 +149,7 @@ public class SkateboardController : MonoBehaviour
             deck.rotation = Quaternion.Lerp(deck.rotation, deck_angle, 5f * Time.fixedDeltaTime);
         }
 
-        if (!on_ground) {
+        if (!on_ground && !upside_down) {
             //can slightly tilt foward and back for steez
             if (v_input > 0) {
                 board_visual.transform.rotation = Quaternion.Lerp(board_visual.transform.rotation, Quaternion.Euler(transform.eulerAngles + new Vector3(steez, 0, 0)), 5f * Time.fixedDeltaTime);
@@ -162,13 +161,32 @@ public class SkateboardController : MonoBehaviour
 
     //Colission functions (called by untiy)
     void OnCollisionStay(Collision collision) {
+        ContactPoint[] contacts = collision.contacts;
+
+        //check normal vectors to see if the object is colliding with something from below
         if (collision.gameObject.transform.parent.name == "Map") {
-            on_ground = true;
+            for (int i=0; i < contacts.Length; i++) {
+                if (contacts[i].thisCollider.name == "Front Truck") {
+                    if (contacts[i].normal.y > 0.5) {
+                        on_ground = true;
+                    }
+                } else if (contacts[i].thisCollider.name == "Back Truck") {
+                    if (contacts[i].normal.y > 0.5) {
+                        on_ground = true;
+                    }
+                }
+            }
 
             if (Vector3.Dot(-transform.up, Vector3.down) > 0.5) {
                 upside_down = false;
             } else {
-                upside_down = true;
+                for (int i=0; i < contacts.Length; i++) {
+                    if (contacts[i].thisCollider.name == "Deck") {
+                        if (contacts[i].normal.y > 0.5) {
+                            upside_down = true;
+                        }
+                    }
+                }
             }
         }
     }
@@ -176,6 +194,7 @@ public class SkateboardController : MonoBehaviour
     void OnCollisionExit(Collision collision) {
         if (collision.gameObject.transform.parent.name == "Map") {
             on_ground = false;
+            upside_down = false;
         }
     }
 }
