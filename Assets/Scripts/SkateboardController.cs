@@ -21,9 +21,11 @@ public class SkateboardController : MonoBehaviour
     private Rigidbody rb;
     private Transform deck;
     private readonly Vector3 gravity = new(0, -200f, 0);
-    private readonly float sideways_friction = 1f;
+    private readonly float sideways_friction = 15f;
     private readonly float max_speed = 7.5f;
-    private readonly float kickturn_thresh = 2.5f;
+    private readonly float kickturn_thresh = 2f;
+    private readonly float kickturn_speed = 100f;
+    private readonly float turn_speed = 15f;
     private readonly float pop = 40f;
     private readonly float steez = 25f;
 
@@ -53,15 +55,15 @@ public class SkateboardController : MonoBehaviour
         //add sideways friction for realistic turning when on ground
         if (on_ground && !upside_down) {
             float sideways_velocity = local_velocity.x;
-            if (sideways_velocity > 1) {
+            if (sideways_velocity > 0.3) {
                 sideways_velocity -= sideways_friction * Time.fixedDeltaTime;
-            } else if (sideways_velocity < -1) {
+            } else if (sideways_velocity < -0.3) {
                 sideways_velocity += sideways_friction * Time.fixedDeltaTime;
             } else {
                 sideways_velocity = 0;
             }
             local_velocity.x = sideways_velocity; //set back
-
+            
             rb.velocity = transform.TransformDirection(local_velocity); //set back to world rel
         }
     }
@@ -84,9 +86,9 @@ public class SkateboardController : MonoBehaviour
             //rotate rigid
             Quaternion delta_rotation;
             if (Math.Abs(local_velocity.z) < kickturn_thresh && Math.Abs(v_input) == 0) {
-                delta_rotation = Quaternion.Euler(new Vector3(0, h_input, 0) * Time.fixedDeltaTime * 100);
+                delta_rotation = Quaternion.Euler(new Vector3(0, h_input, 0) * Time.fixedDeltaTime * kickturn_speed);
             } else {
-                delta_rotation = Quaternion.Euler(new Vector3(0, h_input, 0) * Time.fixedDeltaTime * local_velocity.z*20);
+                delta_rotation = Quaternion.Euler(new Vector3(0, h_input, 0) * Time.fixedDeltaTime * local_velocity.z * turn_speed);
             }
 
             //using MoveRotation for physics handling
