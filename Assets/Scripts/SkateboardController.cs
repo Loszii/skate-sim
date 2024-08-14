@@ -22,7 +22,7 @@ public class SkateboardController : MonoBehaviour
     private Transform deck;
     private readonly Vector3 gravity = new(0, -250f, 0);
     private readonly float sideways_friction = 15f;
-    private readonly float max_speed = 7.5f;
+    private readonly float max_speed = 6f;
     private readonly float kickturn_thresh = 2f;
     private readonly float kickturn_speed = 100f;
     private readonly float turn_speed = 15f;
