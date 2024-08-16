@@ -13,6 +13,7 @@ public class SkateboardController : MonoBehaviour
     private Transform deck;
     private GameObject grind_object;
     private Quaternion grind_rotation;
+    private float grind_speed;
     private readonly Vector3 gravity = new(0, -250f, 0);
     private readonly float sideways_friction = 15f;
     private readonly float max_speed = 6f;
@@ -37,12 +38,17 @@ public class SkateboardController : MonoBehaviour
 
         if (is_grinding) {
             //slide through the grindable collider
-            if (Vector3.Dot(rb.velocity, grind_object.transform.forward) >= 0) { //can either go up or down rail if cos(theta) > 90 in dot
-                rb.velocity = grind_object.transform.forward * 4f;
-            } else {
-                rb.velocity = -grind_object.transform.forward * 4f;
-            }
+            rb.velocity = grind_object.transform.forward * grind_speed;
             transform.rotation = grind_rotation;
+
+            //pop out of grinds
+            float pop = 200f; //override with more pop
+            if (Input.GetKey("o")) {
+                rb.AddForce(transform.up * pop * Time.fixedDeltaTime, ForceMode.Impulse);
+
+                //forward force to offset popping up while rotated backwards
+                rb.AddForce(transform.forward * (pop/4) * Time.fixedDeltaTime, ForceMode.Impulse);
+            }
         } else {
             physics(local_velocity);
             inputs(h_input, v_input, local_velocity);
@@ -166,11 +172,14 @@ public class SkateboardController : MonoBehaviour
     //Colission functions (called by untiy)
 
     void OnCollisionEnter(Collision collision) {
-        if (collision.collider.name == "Grindable") {
+        if (collision.collider.name == "Grindable" && Vector3.Dot(transform.up, Vector3.up) > 0) {
             grind_object = collision.gameObject;
             is_grinding = true;
             grind_rotation = transform.rotation;
-            rb.angularVelocity = new Vector3(0, 0, 0); //to remove and rotations
+            //remove collision based rotations
+            rb.angularVelocity = new Vector3(0, 0, 0);
+
+            grind_speed = Vector3.Dot(rb.velocity, grind_object.transform.forward);
         }
     }
 
@@ -207,6 +216,9 @@ public class SkateboardController : MonoBehaviour
     }
 
     void OnCollisionExit(Collision collision) {
+        //remove collision based rotations
+        rb.angularVelocity = new Vector3(0, 0, 0);
+
         if (collision.collider.name == "Grindable") {
             is_grinding = false;
             grind_object = null;
