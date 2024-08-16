@@ -1,4 +1,5 @@
 using System;
+using TreeEditor;
 using UnityEngine;
 
 public class SkateboardController : MonoBehaviour
@@ -11,6 +12,7 @@ public class SkateboardController : MonoBehaviour
     private Rigidbody rb;
     private Transform deck;
     private GameObject grind_object;
+    private Quaternion grind_rotation;
     private readonly Vector3 gravity = new(0, -250f, 0);
     private readonly float sideways_friction = 15f;
     private readonly float max_speed = 6f;
@@ -34,11 +36,13 @@ public class SkateboardController : MonoBehaviour
         float v_input = Input.GetAxis("Vertical");
 
         if (is_grinding) {
+            //slide through the grindable collider
             if (Vector3.Dot(rb.velocity, grind_object.transform.forward) >= 0) { //can either go up or down rail if cos(theta) > 90 in dot
                 rb.velocity = grind_object.transform.forward * 4f;
             } else {
                 rb.velocity = -grind_object.transform.forward * 4f;
             }
+            transform.rotation = grind_rotation;
         } else {
             physics(local_velocity);
             inputs(h_input, v_input, local_velocity);
@@ -50,9 +54,7 @@ public class SkateboardController : MonoBehaviour
         //applys custom physics like sideways friction and gravity
 
         //gravity
-        if (!is_grinding) {
-            rb.AddForce(gravity * Time.fixedDeltaTime, ForceMode.Acceleration);
-        }
+        rb.AddForce(gravity * Time.fixedDeltaTime, ForceMode.Acceleration);
 
         //add sideways friction for realistic turning when on ground
         if (on_ground && !upside_down) {
@@ -162,13 +164,17 @@ public class SkateboardController : MonoBehaviour
     }
 
     //Colission functions (called by untiy)
-    void OnCollisionStay(Collision collision) {
 
+    void OnCollisionEnter(Collision collision) {
         if (collision.collider.name == "Grindable") {
             grind_object = collision.gameObject;
             is_grinding = true;
-            return;
+            grind_rotation = transform.rotation;
+            rb.angularVelocity = new Vector3(0, 0, 0); //to remove and rotations
         }
+    }
+
+    void OnCollisionStay(Collision collision) {
 
         ContactPoint[] contacts = collision.contacts;
 
