@@ -1,25 +1,16 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Palmmedia.ReportGenerator.Core.Reporting.Builders;
-using TreeEditor;
-using Unity.VisualScripting;
-using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
-using UnityEngine.Timeline;
-using UnityEngine.UIElements;
-using UnityEngine.VFX;
-using UnityEngine.XR;
 
 public class SkateboardController : MonoBehaviour
 {
     public GameObject board_visual;
     public bool on_ground = true;
     public bool upside_down = false; //on ground with up facing down
+    public bool is_grinding = false;
 
     private Rigidbody rb;
     private Transform deck;
+    private GameObject grind_object;
     private readonly Vector3 gravity = new(0, -250f, 0);
     private readonly float sideways_friction = 15f;
     private readonly float max_speed = 6f;
@@ -28,6 +19,7 @@ public class SkateboardController : MonoBehaviour
     private readonly float turn_speed = 15f;
     private readonly float pop = 50f;
     private readonly float steez = 25f;
+    private readonly float flip_speed = 360f;
 
     void Start()
     {   
@@ -41,16 +33,26 @@ public class SkateboardController : MonoBehaviour
         float h_input = Input.GetAxis("Horizontal");
         float v_input = Input.GetAxis("Vertical");
 
-        physics(local_velocity);
-        inputs(h_input, v_input, local_velocity);
-        vfx(h_input, v_input, local_velocity);
+        if (is_grinding) {
+            if (Vector3.Dot(rb.velocity, grind_object.transform.forward) >= 0) { //can either go up or down rail if cos(theta) > 90 in dot
+                rb.velocity = grind_object.transform.forward * 4f;
+            } else {
+                rb.velocity = -grind_object.transform.forward * 4f;
+            }
+        } else {
+            physics(local_velocity);
+            inputs(h_input, v_input, local_velocity);
+            vfx(h_input, v_input, local_velocity);
+        }
     }
 
     void physics(Vector3 local_velocity) {
         //applys custom physics like sideways friction and gravity
 
         //gravity
-        rb.AddForce(gravity * Time.fixedDeltaTime, ForceMode.Acceleration);
+        if (!is_grinding) {
+            rb.AddForce(gravity * Time.fixedDeltaTime, ForceMode.Acceleration);
+        }
 
         //add sideways friction for realistic turning when on ground
         if (on_ground && !upside_down) {
@@ -110,9 +112,9 @@ public class SkateboardController : MonoBehaviour
 
             //kickflip and heelfip
             if (Input.GetKey("i")) {
-                rb.MoveRotation(rb.rotation * Quaternion.Euler(new Vector3(0, 0, 1f) * Time.fixedDeltaTime * 300));
+                rb.MoveRotation(rb.rotation * Quaternion.Euler(new Vector3(0, 0, 1f) * Time.fixedDeltaTime * flip_speed));
             } else if (Input.GetKey("p")) {
-                rb.MoveRotation(rb.rotation * Quaternion.Euler(new Vector3(0, 0, -1f) * Time.fixedDeltaTime * 300));
+                rb.MoveRotation(rb.rotation * Quaternion.Euler(new Vector3(0, 0, -1f) * Time.fixedDeltaTime * flip_speed));
             }
 
             //side to side movement
@@ -161,6 +163,13 @@ public class SkateboardController : MonoBehaviour
 
     //Colission functions (called by untiy)
     void OnCollisionStay(Collision collision) {
+
+        if (collision.collider.name == "Grindable") {
+            grind_object = collision.gameObject;
+            is_grinding = true;
+            return;
+        }
+
         ContactPoint[] contacts = collision.contacts;
 
         //check normal vectors to see if the object is colliding with something from below
@@ -192,7 +201,10 @@ public class SkateboardController : MonoBehaviour
     }
 
     void OnCollisionExit(Collision collision) {
-        if (collision.gameObject.transform.parent.name == "Map") {
+        if (collision.collider.name == "Grindable") {
+            is_grinding = false;
+            grind_object = null;
+        } else if (collision.gameObject.transform.parent.name == "Map") {
             on_ground = false;
             upside_down = false;
         }
