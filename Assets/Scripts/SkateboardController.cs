@@ -12,19 +12,21 @@ public class SkateboardController : MonoBehaviour
     public bool front_right = true;
     public bool back_left = true;
     public bool back_right = true;
-
-    private Rigidbody rb;
+    public bool front_truck_grind = false;
+    public bool back_truck_grind = false;
+    public GameObject grind_object;
+    public Quaternion grind_rotation;
+    public float grind_speed;
+    public Rigidbody rb;
+    
     private Transform deck;
-    private GameObject grind_object;
-    private Quaternion grind_rotation;
-    private float grind_speed;
     private readonly Vector3 gravity = new(0, -250f, 0);
     private readonly float sideways_friction = 15f;
     private readonly float max_speed = 6f;
     private readonly float kickturn_thresh = 2f;
-    private readonly float kickturn_speed = 100f;
+    private readonly float kickturn_speed = 150f;
     private readonly float turn_speed = 15f;
-    private readonly float pop = 75f;
+    private readonly float pop = 60f;
     private readonly float steez = 45f;
     private readonly float flip_speed = 360f;
 
@@ -36,6 +38,7 @@ public class SkateboardController : MonoBehaviour
 
     void FixedUpdate()
     {
+        is_grinding = front_truck_grind || back_truck_grind;
         on_ground = front_left & front_right && back_left && back_right;
         in_air = !front_left & !front_right && !back_left && !back_right;
 
@@ -180,22 +183,8 @@ public class SkateboardController : MonoBehaviour
     }
 
     //Colission functions (called by untiy)
-    void OnCollisionEnter(Collision collision) {
-        if (collision.collider.name == "Grindable" && Vector3.Dot(transform.up, Vector3.up) > 0) {
-            grind_object = collision.gameObject;
-            is_grinding = true;
-            grind_rotation = transform.rotation;
-
-            grind_speed = Vector3.Dot(rb.velocity, grind_object.transform.forward);
-        }
-    }
-
     void OnCollisionExit(Collision collision) {
         //remove rotations from collision
         rb.angularVelocity = new Vector3(0, 0, 0);
-        if (collision.collider.name == "Grindable") {
-            is_grinding = false;
-            grind_object = null;
-        }
     }
 }
