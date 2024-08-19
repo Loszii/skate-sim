@@ -6,7 +6,7 @@ public class GrindCollision : MonoBehaviour
 {   
     public SkateboardController skate_script;
     private string cur;
-    // Start is called before the first frame update
+
     void Start()
     {
         cur = transform.name;
@@ -18,7 +18,13 @@ public class GrindCollision : MonoBehaviour
                 skate_script.front_truck_grind = true;
             } else if (cur == "Back Truck") {
                 skate_script.back_truck_grind = true;
-            }
+            } else if (cur == "Board Slide") {
+                skate_script.board_slide_grind = true;
+            } else if (cur == "Nose Slide") {
+                skate_script.nose_slide_grind = true;
+            } else if (cur == "Tail Slide") {
+                skate_script.tail_slide_grind = true;
+            } 
 
             skate_script.rb.angularVelocity = new Vector3(0, 0, 0);
             skate_script.grind_object = collider.gameObject;
@@ -33,7 +39,13 @@ public class GrindCollision : MonoBehaviour
                 skate_script.front_truck_grind = false;
             } else if (cur == "Back Truck") {
                 skate_script.back_truck_grind = false;
-            }
+            } else if (cur == "Board Slide") {
+                skate_script.board_slide_grind = false;
+            } else if (cur == "Nose Slide") {
+                skate_script.nose_slide_grind = false;
+            } else if (cur == "Tail Slide") {
+                skate_script.tail_slide_grind = false;
+            } 
         }
     }
 }

@@ -5,18 +5,28 @@ using UnityEngine;
 public class SkateboardController : MonoBehaviour
 {
     public GameObject board_visual;
+    //air
     public bool on_ground = true; //all 4 wheels touching
     public bool in_air = false; //none touching
-    public bool is_grinding = false;
+    
+    //ground
     public bool front_left = true;
     public bool front_right = true;
     public bool back_left = true;
     public bool back_right = true;
+
+    //grinds
+    public bool is_grinding = false;
     public bool front_truck_grind = false;
     public bool back_truck_grind = false;
+    public bool board_slide_grind = false;
+    public bool nose_slide_grind = false;
+    public bool tail_slide_grind = false;
     public GameObject grind_object;
     public Quaternion grind_rotation;
     public float grind_speed;
+
+    //physics
     public Rigidbody rb;
     
     private Transform deck;
@@ -38,7 +48,7 @@ public class SkateboardController : MonoBehaviour
 
     void FixedUpdate()
     {
-        is_grinding = front_truck_grind || back_truck_grind;
+        is_grinding = front_truck_grind || back_truck_grind || board_slide_grind || nose_slide_grind || tail_slide_grind;
         on_ground = front_left & front_right && back_left && back_right;
         in_air = !front_left & !front_right && !back_left && !back_right;
 
