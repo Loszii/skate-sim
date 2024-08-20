@@ -37,7 +37,7 @@ public class SkateboardController : MonoBehaviour
     private readonly float kickturn_speed = 150f;
     private readonly float turn_speed = 15f;
     private readonly float pop = 60f;
-    private readonly float steez = 45f;
+    private readonly float steez = 30f;
     private readonly float flip_speed = 360f;
 
     void Start()
@@ -123,19 +123,19 @@ public class SkateboardController : MonoBehaviour
             //air movement
 
             //steez (front and back tilt)
-            Quaternion air_tilt = Quaternion.Euler(rb.rotation.eulerAngles + new Vector3(-rb.rotation.eulerAngles.x, 0, 0)); //level
+            Quaternion air_tilt = Quaternion.Euler(new Vector3(0, rb.rotation.eulerAngles.y, rb.rotation.eulerAngles.z)); //level
 
             if (v_input > 0) {
-                air_tilt = Quaternion.Euler(rb.rotation.eulerAngles + new Vector3(-rb.rotation.eulerAngles.x + steez, 0, 0));
+                air_tilt = Quaternion.Euler(new Vector3(steez, rb.rotation.eulerAngles.y, rb.rotation.eulerAngles.z));
             } else if (v_input < 0) {
-                air_tilt = Quaternion.Euler(rb.rotation.eulerAngles + new Vector3(-rb.rotation.eulerAngles.x - steez, 0, 0));
+                air_tilt = Quaternion.Euler(new Vector3(-steez, rb.rotation.eulerAngles.y, rb.rotation.eulerAngles.z));
             }
 
             rb.MoveRotation(Quaternion.Lerp(rb.rotation, air_tilt, 2f * Time.fixedDeltaTime));
 
 
             //side to side movement
-            rb.MoveRotation(Quaternion.Euler(rb.rotation.eulerAngles + (new Vector3(0, h_input, 0) * Time.fixedDeltaTime * 200)));
+            rb.MoveRotation(Quaternion.Euler(new Vector3(0, h_input, 0) * Time.fixedDeltaTime * 200) * rb.rotation);
 
             //kickflip and heelfip
             if (Input.GetKey("i")) {
@@ -166,29 +166,29 @@ public class SkateboardController : MonoBehaviour
         //controls the way the board looks, however, just the visual aspect, not the actual rigidbody
 
         //first set vfx rotation back to normal, unless kickturning/turning
-        board_visual.transform.rotation = Quaternion.Lerp(board_visual.transform.rotation, Quaternion.Euler(transform.eulerAngles), 5f * Time.fixedDeltaTime); //set vfx to parent vals
+        board_visual.transform.rotation = Quaternion.Lerp(board_visual.transform.rotation, transform.rotation, 5f * Time.fixedDeltaTime); //set vfx to parent vals
         board_visual.transform.position = Vector3.Lerp(board_visual.transform.position, transform.position, 5f * Time.fixedDeltaTime); //position to parent
 
         //set deck to parent rotation by default
-        deck.rotation = Quaternion.Lerp(deck.rotation, Quaternion.Euler(board_visual.transform.eulerAngles), 5f * Time.fixedDeltaTime);
+        deck.rotation = Quaternion.Lerp(deck.rotation, board_visual.transform.rotation, 5f * Time.fixedDeltaTime);
 
         //change the above in case we want to change the board visual upon movement
 
         //kickturn
         if (on_ground && Math.Abs(h_input) > 0 && Math.Abs(v_input) == 0 && Math.Abs(local_velocity.z) < kickturn_thresh) { //kickturn
             //gets a quaternion that uses the current angles about axis and rotates 15 less from x (tilt up)
-            Quaternion kickturn_rotation = Quaternion.Euler(transform.eulerAngles + new Vector3(-15f, 0, 0));
+            Quaternion kickturn_rotation = Quaternion.Euler(new Vector3(-15f, 0, 0));
             //to interpolate smoothly, adjusting delta time multiplier for faster
-            board_visual.transform.rotation = Quaternion.Lerp(board_visual.transform.rotation, kickturn_rotation, 5f * Time.fixedDeltaTime);
+            board_visual.transform.rotation = Quaternion.Lerp(board_visual.transform.rotation, transform.rotation * kickturn_rotation, 5f * Time.fixedDeltaTime);
 
             //move graphics slightly up
-            board_visual.transform.position = Vector3.Lerp(board_visual.transform.position, transform.position + new Vector3(0, 0.02f, 0), 5f * Time.fixedDeltaTime);
+            board_visual.transform.position = Vector3.Lerp(board_visual.transform.position, transform.position + new Vector3(0, 0.04f, 0), 5f * Time.fixedDeltaTime);
         }
         //board tilt
         if (on_ground && Math.Abs(h_input) > 0.1) {
             //rotate h_input*20 from board visual rotation
-            Quaternion deck_angle = Quaternion.Euler(board_visual.transform.eulerAngles + new Vector3(0, 0, -15f * h_input));
-            deck.rotation = Quaternion.Lerp(deck.rotation, deck_angle, 5f * Time.fixedDeltaTime);
+            Quaternion deck_angle = Quaternion.Euler(new Vector3(0, 0, -30f * h_input));
+            deck.rotation = Quaternion.Lerp(deck.rotation, board_visual.transform.rotation * deck_angle, 5f * Time.fixedDeltaTime);
         }
     }
 
