@@ -30,13 +30,13 @@ public class SkateboardController : MonoBehaviour
     public Rigidbody rb;
     
     private Transform deck;
+    private float max_speed = 7.5f;
     private readonly Vector3 gravity = new(0, -300f, 0);
     private readonly float sideways_friction = 15f;
-    private readonly float max_speed = 7.5f;
     private readonly float kickturn_thresh = 2f;
     private readonly float kickturn_speed = 150f;
     private readonly float turn_speed = 15f;
-    private readonly float pop = 75f;
+    private readonly float pop = 50f;
     private readonly float steez = 45f;
     private readonly float flip_speed = 360f;
 
@@ -65,6 +65,10 @@ public class SkateboardController : MonoBehaviour
             //pop out of grinds
             float pop = 200f; //override with more pop
             if (Input.GetKey("o")) {
+                rb.AddForce(transform.up * pop * Time.fixedDeltaTime, ForceMode.Impulse);
+
+                //forward force to offset popping up while rotated backwards
+                rb.AddForce(transform.forward * (pop/4) * Time.fixedDeltaTime, ForceMode.Impulse);
                 rb.AddForce(Vector3.up * pop * Time.fixedDeltaTime, ForceMode.Impulse);
             }
         } else {
@@ -151,8 +155,12 @@ public class SkateboardController : MonoBehaviour
 
         //ollie 
         if (Input.GetKey("o") && back_left && back_right) {
+            rb.AddForce(transform.up * pop * Time.fixedDeltaTime, ForceMode.Impulse);
             rb.AddForce(Vector3.up * pop * Time.fixedDeltaTime, ForceMode.Impulse);
-            rb.MoveRotation(rb.rotation * Quaternion.Euler(-5f, 0, 0));
+            rb.MoveRotation(rb.rotation * Quaternion.Euler(-(pop / 10f), 0, 0));
+
+            //forward force to offset popping up while rotated backwards
+            rb.AddForce(transform.forward * (pop/4) * Time.fixedDeltaTime, ForceMode.Impulse);
         }
     }
 
@@ -194,8 +202,20 @@ public class SkateboardController : MonoBehaviour
         }
     }
 
+    void OnTriggerEnter(Collider collider) {
+        if (collider.name == "Vert") {
+            max_speed = 15f;
+        }
+    }
+
     void OnCollisionExit(Collision collision) {
         //remove rotations from collision
         rb.angularVelocity = new Vector3(0, 0, 0);
+    }
+
+    void OnTriggerExit(Collider collider) {
+        if (collider.name == "Vert") {
+            max_speed = 7.5f;
+        }
     }
 }

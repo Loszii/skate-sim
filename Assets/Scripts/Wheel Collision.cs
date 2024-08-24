@@ -10,26 +10,30 @@ public class WheelCollision : MonoBehaviour
     }
 
     void OnTriggerStay(Collider collider) {
-        if (cur == "Front Left") {
-            skate_script.front_left = true;
-        } else if (cur == "Front Right") {
-            skate_script.front_right = true;
-        } else if (cur == "Back Left") {
-            skate_script.back_left = true;
-        } else if (cur == "Back Right") {
-            skate_script.back_right = true;
+        if (!collider.isTrigger) {
+            if (cur == "Front Left") {
+                skate_script.front_left = true;
+            } else if (cur == "Front Right") {
+                skate_script.front_right = true;
+            } else if (cur == "Back Left") {
+                skate_script.back_left = true;
+            } else if (cur == "Back Right") {
+                skate_script.back_right = true;
+            }
         }
     }
 
     void OnTriggerExit(Collider collider) {
-        if (cur == "Front Left") {
-            skate_script.front_left = false;
-        } else if (cur == "Front Right") {
-            skate_script.front_right = false;
-        } else if (cur == "Back Left") {
-            skate_script.back_left = false;
-        } else if (cur == "Back Right") {
-            skate_script.back_right = false;
+        if (!collider.isTrigger) {
+            if (cur == "Front Left") {
+                skate_script.front_left = false;
+            } else if (cur == "Front Right") {
+                skate_script.front_right = false;
+            } else if (cur == "Back Left") {
+                skate_script.back_left = false;
+            } else if (cur == "Back Right") {
+                skate_script.back_right = false;
+            }
         }
     }
 }
