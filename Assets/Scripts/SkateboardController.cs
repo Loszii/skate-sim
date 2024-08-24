@@ -30,14 +30,14 @@ public class SkateboardController : MonoBehaviour
     public Rigidbody rb;
     
     private Transform deck;
-    private readonly Vector3 gravity = new(0, -250f, 0);
+    private readonly Vector3 gravity = new(0, -300f, 0);
     private readonly float sideways_friction = 15f;
-    private readonly float max_speed = 6f;
+    private readonly float max_speed = 7.5f;
     private readonly float kickturn_thresh = 2f;
     private readonly float kickturn_speed = 150f;
     private readonly float turn_speed = 15f;
-    private readonly float pop = 60f;
-    private readonly float steez = 30f;
+    private readonly float pop = 75f;
+    private readonly float steez = 45f;
     private readonly float flip_speed = 360f;
 
     void Start()
@@ -152,7 +152,7 @@ public class SkateboardController : MonoBehaviour
         //ollie 
         if (Input.GetKey("o") && back_left && back_right) {
             rb.AddForce(Vector3.up * pop * Time.fixedDeltaTime, ForceMode.Impulse);
-            rb.MoveRotation(rb.rotation * Quaternion.Euler(-(pop / 10f), 0, 0));
+            rb.MoveRotation(rb.rotation * Quaternion.Euler(-5f, 0, 0));
         }
     }
 
@@ -187,6 +187,13 @@ public class SkateboardController : MonoBehaviour
     }
 
     //Colission functions (called by untiy)
+
+    void OnCollisionEnter(Collision collision) {
+        if (collision.collider.name == "Floor") {
+            rb.velocity = new Vector3(rb.velocity.x, 0, rb.velocity.z);
+        }
+    }
+
     void OnCollisionExit(Collision collision) {
         //remove rotations from collision
         rb.angularVelocity = new Vector3(0, 0, 0);
