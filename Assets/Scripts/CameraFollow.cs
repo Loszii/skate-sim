@@ -7,7 +7,7 @@ public class CameraFollow : MonoBehaviour
 {
     public GameObject skateboard;
     private Transform target;
-    private readonly float speed = 10f;
+    private float speed = 7.5f;
     private SkateboardController script;
 
     void Start() {
@@ -18,6 +18,11 @@ public class CameraFollow : MonoBehaviour
     void FixedUpdate()
     {
         //pos
+        if (script.is_grinding) {
+            speed = 4f;
+        } else {
+            speed = 7.5f;
+        }
         Vector3 offset = new(0, 0, -2f); //-2 back in local position
         Vector3 target_position = target.TransformPoint(offset) + new Vector3(0, 1f, 0); //transformPoint is relative to object coors sys, then +1 relative to world
     
