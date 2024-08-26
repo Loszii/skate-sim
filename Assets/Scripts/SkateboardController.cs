@@ -1,5 +1,4 @@
 using System;
-using TreeEditor;
 using UnityEngine;
 
 public class SkateboardController : MonoBehaviour
@@ -31,6 +30,7 @@ public class SkateboardController : MonoBehaviour
     
     private Transform deck;
     private float max_speed = 7.5f;
+    private bool can_collide = true;
     private readonly Vector3 gravity = new(0, -300f, 0);
     private readonly float sideways_friction = 15f;
     private readonly float kickturn_thresh = 2f;
@@ -61,9 +61,13 @@ public class SkateboardController : MonoBehaviour
             //slide through the grindable collider
             rb.velocity = grind_object.transform.forward * grind_speed;
             transform.rotation = grind_rotation;
+            //disable collisions
+            if (can_collide) {
+                disable_collisions();
+            }
 
             //pop out of grinds
-            float pop = 200f; //override with more pop
+            float pop = 100f; //override with more pop
             if (Input.GetKey("o")) {
                 rb.AddForce(transform.up * pop * Time.fixedDeltaTime, ForceMode.Impulse);
 
@@ -72,6 +76,11 @@ public class SkateboardController : MonoBehaviour
                 rb.AddForce(Vector3.up * pop * Time.fixedDeltaTime, ForceMode.Impulse);
             }
         } else {
+            if (!can_collide) {
+                enable_collisions(); //enable collisions
+            }
+
+            //main functions
             physics(local_velocity);
             inputs(h_input, v_input, local_velocity);
             vfx(h_input, v_input, local_velocity);
@@ -112,7 +121,7 @@ public class SkateboardController : MonoBehaviour
 
             //rotate rigid
             Quaternion delta_rotation;
-            if (Math.Abs(local_velocity.z) < kickturn_thresh && Math.Abs(v_input) == 0) {
+            if (Math.Abs(local_velocity.z) <= kickturn_thresh && Math.Abs(v_input) == 0) {
                 delta_rotation = Quaternion.Euler(new Vector3(0, h_input, 0) * Time.fixedDeltaTime * kickturn_speed);
             } else {
                 delta_rotation = Quaternion.Euler(new Vector3(0, h_input, 0) * Time.fixedDeltaTime * local_velocity.z * turn_speed);
@@ -177,7 +186,7 @@ public class SkateboardController : MonoBehaviour
         //change the above in case we want to change the board visual upon movement
 
         //kickturn
-        if (on_ground && Math.Abs(h_input) > 0 && Math.Abs(v_input) == 0 && Math.Abs(local_velocity.z) < kickturn_thresh) { //kickturn
+        if (on_ground && Math.Abs(h_input) > 0 && Math.Abs(v_input) == 0 && Math.Abs(local_velocity.z) <= kickturn_thresh) { //kickturn
             //gets a quaternion that uses the current angles about axis and rotates 15 less from x (tilt up)
             Quaternion kickturn_rotation = Quaternion.Euler(new Vector3(-15f, 0, 0));
             //to interpolate smoothly, adjusting delta time multiplier for faster
@@ -185,6 +194,21 @@ public class SkateboardController : MonoBehaviour
 
             //move graphics slightly up
             board_visual.transform.position = Vector3.Lerp(board_visual.transform.position, transform.position + new Vector3(0, 0.04f, 0), 5f * Time.fixedDeltaTime);
+        } else if (((front_left && front_right) || (back_left && back_right)) && Math.Abs(v_input) > 0) {
+            //manuals, double angle of kickturn
+            if (Input.GetKey("left shift")) {
+                Quaternion manual_rotation = Quaternion.Euler(new Vector3(-30f, 0, 0));
+                board_visual.transform.rotation = Quaternion.Lerp(board_visual.transform.rotation, transform.rotation * manual_rotation, 5f * Time.fixedDeltaTime);
+
+                //move graphics slightly up
+                board_visual.transform.position = Vector3.Lerp(board_visual.transform.position, transform.position + new Vector3(0, 0.08f, 0), 5f * Time.fixedDeltaTime);
+            } else if (Input.GetKey("left ctrl")) {
+                Quaternion manual_rotation = Quaternion.Euler(new Vector3(30f, 0, 0));
+                board_visual.transform.rotation = Quaternion.Lerp(board_visual.transform.rotation, transform.rotation * manual_rotation, 5f * Time.fixedDeltaTime);
+
+                //move graphics slightly up
+                board_visual.transform.position = Vector3.Lerp(board_visual.transform.position, transform.position + new Vector3(0, 0.08f, 0), 5f * Time.fixedDeltaTime);
+            }
         }
         //board tilt
         if (on_ground && Math.Abs(h_input) > 0.1) {
@@ -193,18 +217,41 @@ public class SkateboardController : MonoBehaviour
             deck.rotation = Quaternion.Lerp(deck.rotation, board_visual.transform.rotation * deck_angle, 5f * Time.fixedDeltaTime);
         }
     }
+    
+    void disable_collisions() {
+        //iterates through all colliders and disables to create smoother grinding
+        Collider[] colliders = rb.GetComponentsInChildren<Collider>();
+        for (int i=0; i < colliders.Length; i++) {
+            if (!colliders[i].isTrigger) {
+                colliders[i].enabled = false;
+            }
+        }
+        can_collide = false;
+    }
+
+    void enable_collisions() {
+        //inverse of disable_collisions
+        Collider[] colliders = rb.GetComponentsInChildren<Collider>();
+        for (int i=0; i < colliders.Length; i++) {
+            if (!colliders[i].isTrigger) {
+                colliders[i].enabled = true;
+            }
+        }
+        can_collide = true;
+    }
 
     //Colission functions (called by untiy)
-
     void OnCollisionEnter(Collision collision) {
+        //smooth landings
         if (collision.collider.name == "Floor") {
             rb.velocity = new Vector3(rb.velocity.x, 0, rb.velocity.z);
         }
     }
 
     void OnTriggerEnter(Collider collider) {
+        //make vert more fast paced
         if (collider.name == "Vert") {
-            max_speed = 15f;
+            max_speed = 10f;
         }
     }
 
