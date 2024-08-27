@@ -6,16 +6,16 @@ A gnarly game made using **Unity**. In this game you control a skateboard and ca
 
 Unzip the **skate-sim.zip** file and run the executable. The main purpose/goal is to just enjoy cruising around while expressing your creativity via forming unique and elegant tricks. The game is made to play on keyboard only, with typically movement being **W/S** and turning being **A/D**. Below is a list of full controls.
 
-### Controls
+### Controls:  
 
-***Movement*** - WASD
-***Ollie/Jump*** - O
-***Spin Left/Kickflip*** - I
-***Spin Right/Heelflip*** - P
-***Manual** - SHIFT
-***Nose Manual*** - CTRL
-***Save Checkpoint*** - ENTER
-***Load Checkpoint*** - BACK
+***Movement*** - WASD  
+***Ollie/Jump*** - O  
+***Spin Left/Kickflip*** - I  
+***Spin Right/Heelflip*** - P  
+***Manual** - SHIFT  
+***Nose Manual*** - CTRL  
+***Save Checkpoint*** - ENTER  
+***Load Checkpoint*** - BACK  
 
 # Final Remarks
 
