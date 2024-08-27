@@ -26,6 +26,7 @@ public class GrindCollision : MonoBehaviour
                 skate_script.tail_slide_grind = true;
             } 
 
+            //set grind settings
             skate_script.rb.angularVelocity = new Vector3(0, 0, 0);
             skate_script.grind_object = collider.gameObject;
             skate_script.grind_rotation = skate_script.transform.rotation;

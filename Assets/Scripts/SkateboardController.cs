@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 
 public class SkateboardController : MonoBehaviour
@@ -40,14 +41,28 @@ public class SkateboardController : MonoBehaviour
     private readonly float steez = 45f;
     private readonly float flip_speed = 360f;
 
+    //checkpoint
+    private Vector3 previous_pos;
+    private Quaternion previous_rot;
+
     void Start()
     {   
         rb = GetComponent<Rigidbody>();
         deck = board_visual.transform.Find("Deck");
+        previous_pos = transform.position;
+        previous_rot = transform.rotation;
+    }
+
+    void Update() {
+        //exit
+        if (Input.GetKey("escape")) {
+            Application.Quit();
+        }
     }
 
     void FixedUpdate()
-    {
+    {   
+        //normal game loop
         is_grinding = front_truck_grind || back_truck_grind || board_slide_grind || nose_slide_grind || tail_slide_grind;
         on_ground = front_left & front_right && back_left && back_right;
         in_air = !front_left & !front_right && !back_left && !back_right;
@@ -85,6 +100,7 @@ public class SkateboardController : MonoBehaviour
             inputs(h_input, v_input, local_velocity);
             vfx(h_input, v_input, local_velocity);
         }
+        checkpoint();
     }
 
     void physics(Vector3 local_velocity) {
@@ -210,7 +226,7 @@ public class SkateboardController : MonoBehaviour
                 board_visual.transform.position = Vector3.Lerp(board_visual.transform.position, transform.position + new Vector3(0, 0.08f, 0), 5f * Time.fixedDeltaTime);
             }
         }
-        //board tilt
+        //board tilt when turning using trucks
         if (on_ground && Math.Abs(h_input) > 0.1) {
             //rotate h_input*20 from board visual rotation
             Quaternion deck_angle = Quaternion.Euler(new Vector3(0, 0, -30f * h_input));
@@ -218,6 +234,20 @@ public class SkateboardController : MonoBehaviour
         }
     }
     
+    void checkpoint() {
+        //function to let player save their location and return
+        //player is warping in time/saving position
+        if (Input.GetKey("backspace")) {
+            transform.position = previous_pos;
+            transform.rotation = previous_rot;
+            rb.velocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        } else if (Input.GetKey("return") && !is_grinding && on_ground) {
+            previous_pos = transform.position;
+            previous_rot = transform.rotation;
+        }
+    }
+
     void disable_collisions() {
         //iterates through all colliders and disables to create smoother grinding
         Collider[] colliders = rb.GetComponentsInChildren<Collider>();

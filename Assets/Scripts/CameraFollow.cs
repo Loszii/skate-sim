@@ -7,21 +7,22 @@ public class CameraFollow : MonoBehaviour
 {
     public GameObject skateboard;
     private Transform target;
-    private float speed = 7.5f;
+    private float speed = 10f;
     private SkateboardController script;
 
     void Start() {
-        script = skateboard.GetComponent<SkateboardController>(); //can use script.on_ground to change air camera settings
+        script = skateboard.GetComponent<SkateboardController>();
         target = skateboard.transform;
     }
 
     void FixedUpdate()
     {
+        //make the camera follow the board object
         //pos
         if (script.is_grinding) {
-            speed = 4f;
+            speed = 5f;
         } else {
-            speed = 7.5f;
+            speed = 10f;
         }
         Vector3 offset = new(0, 0, -2f); //-2 back in local position
         Vector3 target_position = target.TransformPoint(offset) + new Vector3(0, 1f, 0); //transformPoint is relative to object coors sys, then +1 relative to world
