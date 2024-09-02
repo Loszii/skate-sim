@@ -12,7 +12,7 @@ Unzip the **skate-sim.zip** file and run the executable. The main purpose/goal i
 ***Ollie/Jump*** - O  
 ***Spin Left/Kickflip*** - I  
 ***Spin Right/Heelflip*** - P  
-***Manual** - SHIFT  
+**Manual** - SHIFT  
 ***Nose Manual*** - CTRL  
 ***Save Checkpoint*** - ENTER  
 ***Load Checkpoint*** - BACK  
